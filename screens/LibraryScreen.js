@@ -21,7 +21,7 @@ export default function HomeScreen() {
 
             {/* Body */}
             <View className="flex items-center justify-center">
-
+                <FolderGrap />
             </View>
             <Text className="text-white text-1xl font-bold">Example Text</Text>
         </ScrollView>
