@@ -3,27 +3,28 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Bars3CenterLeftIcon, MagnifyingGlassIcon } from 'react-native-heroicons/outline'
-import FolderGrap from '../components/fileBrowserComponent';
+import SelectFolder from '../components/folderSelector';
 
 const ios = Platform.OS == 'ios';
 var { width, height } = Dimensions.get('window')
 
-export default function HomeScreen() {
+export default function LibraryScreen() {
     return (
-        <ScrollView className=" bg-neutral-800" height="100">
+        <SafeAreaView className="flex-1 bg-neutral-800">
             {/* Header */}
             <View className="items-center mt-1 mb-1">
                 <View className="" >
-                    <Text className="text-white text-3xl font-bold">Home Screen</Text>
+                    <Text className="text-white text-3xl font-bold">Library Screen</Text>
                 </View>
             </View>
-            <View style={{ flex: 1, height: 1, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+            {/* Spacer */}
+            <View style={{ flex: 0, height: 1, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
 
             {/* Body */}
-            <View className="flex items-center justify-center">
-                <FolderGrap />
+            <View className="flex items-center" >
+                <SelectFolder />
             </View>
             <Text className="text-white text-1xl font-bold">Example Text</Text>
-        </ScrollView>
+        </SafeAreaView>
     );
 }

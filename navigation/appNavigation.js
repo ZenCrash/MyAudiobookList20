@@ -35,7 +35,6 @@ function LibraryStack() {
 export default function AppNavigation() {
     return (
         <NavigationContainer>
-            {/* <HeaderComponent /> */}
             <Tab.Navigator
                 initialRouteName={homeName}
                 screenOptions={({ route }) => ({
