@@ -3,7 +3,7 @@ import React from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { StatusBar } from "expo-status-bar";
 import { Bars3CenterLeftIcon, MagnifyingGlassIcon } from 'react-native-heroicons/outline'
-import SelectFolder from '../components/folderSelector';
+import FileListComponent from '../components/fileListComponent.js';
 
 const ios = Platform.OS == 'ios';
 var { width, height } = Dimensions.get('window')
@@ -17,14 +17,13 @@ export default function LibraryScreen() {
                     <Text className="text-white text-3xl font-bold">Library Screen</Text>
                 </View>
             </View>
-            {/* Spacer */}
+            {/* Spacer Line */}
             <View style={{ flex: 0, height: 1, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
 
             {/* Body */}
-            <View className="flex items-center" >
-                <SelectFolder />
+            <View>
+                <FileListComponent />
             </View>
-            <Text className="text-white text-1xl font-bold">Example Text</Text>
         </SafeAreaView>
     );
 }
