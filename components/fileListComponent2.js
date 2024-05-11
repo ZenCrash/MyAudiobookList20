@@ -3,27 +3,6 @@ import { View, Text, Pressable, FlatList } from 'react-native';
 import * as FileSystem from 'expo-file-system';
 import Ionicon from 'react-native-vector-icons/Ionicons';
 
-//Get all Files and folders
-// const getFilesAndFolders = async () => {
-//     const [folders, setFolders] = useState;
-
-//     try {
-//         const { exists, isDirectory, uri} = await FileSystem.getInfoAsync("/");
-//         if (exists){
-//             if (isDirectory){
-
-//             }
-//             else{
-//                 setFiles = 
-//             }
-//         }
-//     }
-//     catch {
-//         console.error("Fetching files and folder dident failed!")
-//     }
-
-// }
-
 //Main
 const FileListComponent = () => {
     const [selectedDirectory, setSelectedDirectory] = useState("file:///sdcard/");
@@ -32,8 +11,9 @@ const FileListComponent = () => {
     const [files, setFiles] = useState([]);
 
     //click evenets
-    const handleClickFolder = () => {
-        setDirectory("NewDirectory")
+    const handleClickFolder = async (item) => {
+        setSelectedDirectory(item);
+        console.log(selectedDirectory);
     };
     const handleClickFile = () => {
         setSelectedFile("NewFile")
@@ -41,56 +21,76 @@ const FileListComponent = () => {
 
     //use effects
     useEffect(() => {
+        setSelectedDirectory(selectedDirectory);
+        console.log(selectedDirectory);
         getFilesAndFolders(selectedDirectory);
-    }, []);
+    }, [selectedDirectory]);
 
-    const getFilesAndFolders = async (Directory = "file:///sdcard/") => {
+    const getFilesAndFolders = async (directory) => {
         try {
-            const { exists, isDirectory, uri } = await FileSystem.getInfoAsync(Directory);
+            const { exists, isDirectory, uri } = await FileSystem.getInfoAsync(directory);
             if (exists) {
                 if (isDirectory) {
                     const folders = await FileSystem.readDirectoryAsync(uri);
-                    setDirectorys(folders);
+                    const folderData = folders.map(folder => ({
+                        name: folder.split('/').pop(),
+                        path: `${directory}${folder}`
+                    }));
+                    setDirectorys(folderData);
                 } else {
                     const files = await FileSystem.readDirectoryAsync(uri);
-                    setFiles(files);
+                    const fileData = files.map(file => ({
+                        name: file.split('/').pop(),
+                        path: `${Directory}${file}`
+                    }));
+                    setFiles(fileData);
                 }
             }
+
         } catch (error) {
             console.error('Error reading directory:', error);
         }
     }
 
     //View
-    console.log("hihi");
+    console.log(directorys.length);
 
     return (
         <View className="">
             <View className="mb-2" style={{ backgroundColor: "#404040" }}>
-                <Text className="ml-3 text-white text-1xl mb-1 mt-1">
-                    {selectedDirectory === "/" ? "Storage >" : selectedDirectory.replace("/", " > ")}
-                </Text>
+                <View className="ml-3  mb-1 mt-1">
+                    {selectedDirectory === "/" ? <Text>{"Storage >"}</Text> :
+                        selectedDirectory
+                            .replace("file:///", "")
+                            .split("/")
+                            .reduce((acc, curr) => {
+                                acc.push([curr, (acc.at(-1)) ? `${acc.at(-1)[1]}/${curr}` : curr])
+                                console.log(acc);
+                                return acc;
+                            }, [])
+                            .map((paths) => {
+                                const [name, path] = paths;
+                                return <Pressable key={path} onPress={() => handleClickFolder(`file:///${path}`)}>
+                                    <Text className="text-white text-1xl">{name}</Text>
+                                </Pressable>
+                            })
+                    }
+                </View>
             </View>
-            <Pressable className="ml-3 flex-row items-center mb-1">
-                <Ionicon name='folder-open' color="royalblue" size={30} />
-                <Text className="text-white text-2xl"> FolderName</Text>
-            </Pressable>
-            <Pressable className="ml-3 flex-row items-center">
-                <Ionicon name='document' color="royalblue" size={30} />
-                <Text className="text-white text-2xl"> FileName</Text>
-            </Pressable>
 
-            {/* Spacer */}
-            <View className=" mt-2 mb-2" style={{ flex: 0, height: 1, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} />
+            {/* Spacer
+            <View className=" mt-2 mb-2" style={{ flex: 0, height: 1, backgroundColor: 'rgba(255, 255, 255, 0.2)' }} /> */}
 
             <Text className="text-white text-2xl underline">Folders:</Text>
             <FlatList
                 data={directorys}
                 renderItem={({ item }) => {
-                    const folderName = item.split('/').pop();
                     return (
                         <View>
-                            <Text className="text-white text-1xl">+ {item}</Text>
+                            <Pressable className="ml-3 flex-row items-center mb-1" onPress={() => handleClickFolder(item.path)}>
+                                <Ionicon name='folder-open' color="royalblue" size={30} />
+                                <Text className="text-white text-2xl"> {item.name}</Text>
+                            </Pressable>
                         </View>
                     );
                 }}
@@ -100,11 +100,11 @@ const FileListComponent = () => {
             <FlatList
                 data={files}
                 renderItem={({ item }) => {
-                    const fileName = item.split('/').pop();
                     return (
-                        <View>
-                            <Text className="text-white text-1xl">- {item}</Text>
-                        </View>
+                        <Pressable className="ml-3 flex-row items-center">
+                            <Ionicon name='document' color="royalblue" size={30} />
+                            <Text className="text-white text-2xl"> {item.name}</Text>
+                        </Pressable>
                     );
                 }}
                 keyExtractor={(item, index) => index.toString()}
