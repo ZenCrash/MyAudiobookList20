@@ -6,6 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 //Screens
 import HomeScreen from '../screens/HomeScreen';
 import LibraryScreen from '../screens/LibraryScreen';
+import MuisicPlayerComponent from '../components/musicPlayerComponent';
 
 //Screen Names
 const homeName = 'Home';
@@ -26,6 +27,7 @@ function LibraryStack() {
     return (
         <Stack.Navigator>
             <Stack.Screen name="Index" options={{ headerShown: false }} component={LibraryScreen} />
+            <Stack.Screen name="MusicPlayer" options={{ headerShown: false }} component={MuisicPlayerComponent} />
         </Stack.Navigator>
     );
 }
@@ -67,7 +69,7 @@ export default function AppNavigation() {
                         // tabBarIcon: () => (
                         //     <HomeIcon size="30" strokeWidth={2} color="gray" />)
                     }} />
-                {/* Home Screen */}
+                {/* Libary Screen */}
                 <Tab.Screen name={libraryName} component={LibraryStack}
                     options={{
                         headerShown: false,

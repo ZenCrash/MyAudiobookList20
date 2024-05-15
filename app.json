@@ -2,5 +2,11 @@
   "expo": {
     "name": "MyAudiobookList20",
     "slug": "MyAudiobookList20"
+  },
+  "android": {
+    "permissions": [
+      "READ_EXTERNAL_STORAGE",
+      "WRITE_EXTERNAL_STORAGE"
+    ]
   }
 }
