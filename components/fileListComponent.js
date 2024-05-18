@@ -8,6 +8,7 @@ import { Ionicons } from '@expo/vector-icons';
 import SimpleIcons from '@expo/vector-icons/SimpleLineIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
 import { useNavigation } from '@react-navigation/native';
+import * as Device from 'expo-device';
 
 const FileListComponent = () => {
     /* ---------------------------------------------------------------------- */
@@ -18,6 +19,9 @@ const FileListComponent = () => {
     const [selectedFile, setSelectedFile] = useState();
     const [directorys, setDirectorys] = useState([]);
     const [files, setFiles] = useState([]);
+    const navigation = useNavigation();
+    const sdCardPath = "NULL";
+    const internalStoragePath = "file:///storage/emulated/0/";
 
     /* ---------------------------------------------------------------------- */
     /* Click Events */
@@ -31,7 +35,7 @@ const FileListComponent = () => {
 
     const handleClickFile = async (item) => {
         console.log("You clicked a file with the path: ", item);
-        const navigation = useNavigation();
+        navigation.navigate("MusicPlayer", { item, files })
     };
 
 
@@ -117,10 +121,15 @@ const FileListComponent = () => {
                         </View>
                     </View>
                     <View className="ml-3 mt-3">
-                        <Pressable className="flex-row items-center" onPress={() => handleClickFolder("file:///storage/1620-300F")}>
+                        <Pressable className="flex-row items-center" onPress={() => handleClickFolder(internalStoragePath)}>
                             <MaterialCommunityIcons name="sd" size={30} color="royalblue" />
                             {/* <Ionicon name='phone-portrait-sharp' color="royalblue" size={30} /> */}
-                            <Text className="text-white text-2xl"> SD Card</Text>
+                            <Text className="text-white text-2xl">Internal Storage</Text>
+                        </Pressable>
+                        <Pressable className="flex-row items-center" onPress={() => handleClickFolder(sdCardPath)}>
+                            <MaterialCommunityIcons name="sd" size={30} color="royalblue" />
+                            {/* <Ionicon name='phone-portrait-sharp' color="royalblue" size={30} /> */}
+                            <Text className="text-white text-2xl">SD Card</Text>
                         </Pressable>
                     </View>
                 </View>
@@ -140,7 +149,7 @@ const FileListComponent = () => {
                     </View>
                     {/* <Text className="text-gray-600 text-2xl text-center">{directorys.length} Items</Text> */}
                     {/* Folders and files */}
-                    <View className="ml-3">
+                    <View className="">
                         {/* Folders */}
                         <View>
                             <FlatList
@@ -148,7 +157,7 @@ const FileListComponent = () => {
                                 data={directorys}
                                 renderItem={({ item }) => {
                                     return (
-                                        <View>
+                                        <View className="ml-3">
                                             {(item.isDirectory) ?
                                                 <Pressable className="flex-row items-center mb-1" onPress={() => handleClickFolder(item.path)}>
                                                     <MaterialCommunityIcons name="folder" size={30} color="goldenrod" />
@@ -158,7 +167,7 @@ const FileListComponent = () => {
                                                     </View>
                                                 </Pressable>
                                                 :
-                                                <Pressable className="flex-row items-center mb-1" onPress={() => handleClickFile(item.path)}>
+                                                <Pressable className="flex-row items-center mb-1" onPress={() => handleClickFile(item)}>
                                                     <MaterialCommunityIcons name='music' color="blueviolet" size={30} />
                                                     <View>
                                                         <Text className="text-white text-2xl"> {item.name}</Text>
@@ -172,6 +181,7 @@ const FileListComponent = () => {
                                 }}
                                 keyExtractor={(item, index) => index.toString()}
                                 ListFooterComponent={<Text></Text>}
+                                ListEmptyComponent={<Text className="text-gray-500 text-2xl text-center">Folder is empty</Text>}
                             />
                         </View>
                     </View>

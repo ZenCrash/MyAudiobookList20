@@ -1,11 +1,25 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, ScrollView, Platform } from 'react-native';
-import * as FileSystem from 'expo-file-system';
+import React from 'react';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import Ionicons from '@expo/vector-icons/Ionicons';
+import { useNavigation } from '@react-navigation/native';
 
-export default function MusicPlayerComponent() {
+const MusicPlayerComponent = ({ route }) => {
+    const navigation = useNavigation();
+    const { item, files } = route.params;
+
     return (
-        <View>
-
-        </View>
+        <SafeAreaView className="flex-1 bg-neutral-800">
+            <TouchableOpacity className="pl-3 pt-1" onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back-circle-outline" size={24} color="gray" />
+            </TouchableOpacity>
+            <View>
+                {console.log(item.name)}
+                <Text className="text-white text-2xl text-center">{item.name.split(".")[0]}</Text>
+                <Image source={{ uri: item.cover }} style={{ height: 200, width: 200 }} />
+            </View>
+        </SafeAreaView>
     );
 }
+
+export default MusicPlayerComponent;
