@@ -1,192 +1,58 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Pressable, FlatList, ScrollView, Platform } from 'react-native';
+import { View, Text, SafeAreaView, Button, FlatList, Pressable } from 'react-native';
 import * as FileSystem from 'expo-file-system';
-import Ionicon from 'react-native-vector-icons/Ionicons';
-import { Button } from 'react-native-web';
-import { NativeWindStyleSheet } from 'nativewind';
-import { Ionicons } from '@expo/vector-icons';
-import SimpleIcons from '@expo/vector-icons/SimpleLineIcons';
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons'
-import { useNavigation } from '@react-navigation/native';
-import * as Device from 'expo-device';
+import * as MediaLibrary from 'expo-media-library';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 
 const FileListComponent = () => {
-    /* ---------------------------------------------------------------------- */
-    /* properties */
-    /* ---------------------------------------------------------------------- */
+    const [albums, setAlbums] = useState([]);
+    const [folders, setFolders] = useState([]);
+    const [permissionResponse, setPermissionResponse] = useState();
 
-    const [selectedDirectory, setSelectedDirectory] = useState("");
-    const [selectedFile, setSelectedFile] = useState();
-    const [directorys, setDirectorys] = useState([]);
-    const [files, setFiles] = useState([]);
-    const navigation = useNavigation();
-    const sdCardPath = "NULL";
-    const internalStoragePath = "file:///storage/emulated/0/";
-
-    /* ---------------------------------------------------------------------- */
-    /* Click Events */
-    /* ---------------------------------------------------------------------- */
-
-    //click evenets
-    const handleClickFolder = async (item) => {
-        setSelectedDirectory(item);
-        // console.log("(folderclick) Selected Directory:   ", selectedDirectory);
-    };
-
-    const handleClickFile = async (item) => {
-        console.log("You clicked a file with the path: ", item);
-        navigation.navigate("MusicPlayer", { item, files })
-    };
+    const handleButtonPress = async () => {
+        getPermission();
+    }
 
 
 
-    /* ---------------------------------------------------------------------- */
-    /* Use Effcts */
-    /* ---------------------------------------------------------------------- */
+    // Get permission
+    const getAlbums = async () => {
+        const permission = await MediaLibrary.getPermissionsAsync();
 
-    //use effects
-    useEffect(() => {
-        // console.log("(useeffect)   Selected Directory:   ", selectedDirectory);
-        if (selectedDirectory !== "") {
-
-            console.log("(useEffect) Selected Directory:   ", selectedDirectory);
-            getFoldersAndFiles(selectedDirectory);
+        if (permission.status === 'granted') {
+            console.log("permission.status1: ", permission.status);
+            const albums = await MediaLibrary.getAlbumsAsync();
         }
-
-    }, [selectedDirectory]);
-
-    /* ---------------------------------------------------------------------- */
-    /* Methods */
-    /* ---------------------------------------------------------------------- */
-
-    //Get Folders
-    const getFoldersAndFiles = async (directory) => {
-        try {
-            const { exists, isDirectory, uri } = await FileSystem.getInfoAsync(directory);
-            if (exists) {
-                if (isDirectory) {
-                    const items = await FileSystem.readDirectoryAsync(uri);
-                    const folderData = [];
-                    const fileData = [];
-
-                    for (const item of items) {
-                        const { exists: isItemExists, isDirectory: isItemDirectory } = await FileSystem.getInfoAsync(`${directory}/${item}`);
-                        if (isItemExists) {
-                            if (isItemDirectory) {
-                                folderData.push({
-                                    name: item,
-                                    path: `${directory}/${item}`,
-                                    isDirectory: true,
-                                });
-                            }
-                            else {
-                                const fileExtension = item.split('.').pop().toLowerCase();
-                                if (fileExtension === "mp3" ||
-                                    fileExtension === "mp4" ||
-                                    fileExtension === "m4a" ||
-                                    fileExtension === "m4b") {
-
-                                    fileData.push({
-                                        name: item,
-                                        path: `${directory}/${item}`,
-                                        isDirectory: false,
-                                        fileType: fileExtension,
-                                    })
-                                }
-                            }
-                        }
-                    }
-                    setFiles(fileData);
-                    setDirectorys(folderData.concat(fileData));
-                }
-            }
-        } catch (error) {
-            console.error('Error reading directory:', error);
+        else {
+            console.log("permission.status2: ", permission.status);
+            const newPermission = await MediaLibrary.requestPermissionsAsync();
+            setPermissionResponse(newPermission);
         }
     }
 
-    /* ---------------------------------------------------------------------- */
-    /* View */
-    /* ---------------------------------------------------------------------- */
-
+    /* Main View */
     return (
-        <View className="flex-auto mb-10">
-
-            {/* Root directory checker */}
-            {(selectedDirectory === "") ?
-                <View className="flex-auto">
-                    <View className="" style={{ backgroundColor: "#404040" }}>
-                        <View className="flex-row ml-3">
-                            <Text className="text-white">Storage</Text>
+        <SafeAreaView>
+            <Button title='Add Library' onPress={getAlbums} />
+            <FlatList
+                className="pt-3"
+                data={folders}
+                renderItem={({ item }) => {
+                    return (
+                        <View className="ml-3">
+                            <MaterialCommunityIcons name='folder' color="blueviolet" size={30} />
+                            <View>
+                                <Text className="text-white text-2xl"> {item.title}</Text>
+                                {/* <Text className=" text-gray-400"> {item.path}</Text> */}
+                            </View>
                         </View>
-                    </View>
-                    <View className="ml-3 mt-3">
-                        <Pressable className="flex-row items-center" onPress={() => handleClickFolder(internalStoragePath)}>
-                            <MaterialCommunityIcons name="sd" size={30} color="royalblue" />
-                            {/* <Ionicon name='phone-portrait-sharp' color="royalblue" size={30} /> */}
-                            <Text className="text-white text-2xl">Internal Storage</Text>
-                        </Pressable>
-                        <Pressable className="flex-row items-center" onPress={() => handleClickFolder(sdCardPath)}>
-                            <MaterialCommunityIcons name="sd" size={30} color="royalblue" />
-                            {/* <Ionicon name='phone-portrait-sharp' color="royalblue" size={30} /> */}
-                            <Text className="text-white text-2xl">SD Card</Text>
-                        </Pressable>
-                    </View>
-                </View>
-                :
-
-                //Sub Directory
-                <View className="flex-auto">
-                    <View className="mb-2" style={{ backgroundColor: "#404040" }}>
-                        <View className="flex-row ml-3 mb-1 mt-1">
-                            <Pressable onPress={() => handleClickFolder("")}>
-                                <View className="flex-row">
-                                    <Text className="text-white">{"Storage "} </Text>
-                                    <Text className="text-white">{selectedDirectory}</Text>
-                                </View>
-                            </Pressable>
-                        </View>
-                    </View>
-                    {/* <Text className="text-gray-600 text-2xl text-center">{directorys.length} Items</Text> */}
-                    {/* Folders and files */}
-                    <View className="">
-                        {/* Folders */}
-                        <View>
-                            <FlatList
-                                className="pt-3"
-                                data={directorys}
-                                renderItem={({ item }) => {
-                                    return (
-                                        <View className="ml-3">
-                                            {(item.isDirectory) ?
-                                                <Pressable className="flex-row items-center mb-1" onPress={() => handleClickFolder(item.path)}>
-                                                    <MaterialCommunityIcons name="folder" size={30} color="goldenrod" />
-                                                    <View>
-                                                        <Text className="text-white text-2xl"> {item.name}</Text>
-                                                        {/* <Text className=" text-gray-400"> {item.path}</Text> */}
-                                                    </View>
-                                                </Pressable>
-                                                :
-                                                <Pressable className="flex-row items-center mb-1" onPress={() => handleClickFile(item)}>
-                                                    <MaterialCommunityIcons name='music' color="blueviolet" size={30} />
-                                                    <View>
-                                                        <Text className="text-white text-2xl"> {item.name}</Text>
-                                                        {/* <Text className=" text-gray-400"> {item.path}</Text> */}
-                                                    </View>
-                                                </Pressable>
-                                            }
-
-                                        </View>
-                                    );
-                                }}
-                                keyExtractor={(item, index) => index.toString()}
-                                ListFooterComponent={<Text></Text>}
-                                ListEmptyComponent={<Text className="text-gray-500 text-2xl text-center">Folder is empty</Text>}
-                            />
-                        </View>
-                    </View>
-                </View>}
-        </View>
+                    );
+                }}
+                keyExtractor={(item, index) => index.toString()}
+                ListFooterComponent={<Text></Text>}
+                ListEmptyComponent={<Text className="text-gray-500 text-2xl text-center">Folder is empty</Text>}
+            />
+        </SafeAreaView>
     )
 }
 
